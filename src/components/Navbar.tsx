@@ -54,25 +54,7 @@ const Navbar = () => {
         </div>
 
 
-        <div className="hidden md:flex items-center space-x-4">
-          <ThemeToggle />
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
-              Home
-            </Link>
-            <Link to="/cars" className="text-sm font-medium transition-colors hover:text-primary">
-              Cars
-            </Link>
-            <a href="/#services" className="text-sm font-medium transition-colors hover:text-primary">
-              Services
-            </a>
-            
-            <Link to="/contact" className="text-sm font-medium transition-colors hover:text-primary">
-              Contact
-            </Link>
-          </div>
+        
 
 
           {/* Favorites */}
