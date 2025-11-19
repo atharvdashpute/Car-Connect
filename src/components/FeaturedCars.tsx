@@ -2,16 +2,17 @@ import CarCard from "./CarCard";
 import suvImage from "@/assets/suv-1.jpg";
 import sedanImage from "@/assets/sedan-1.jpg";
 import sportsImage from "@/assets/sports-1.jpg";
+import { formatPrice, convertUSDtoINR } from "@/utils/currency";
 
 const FeaturedCars = () => {
   const cars = [
     {
       id: "1",
       title: "BMW X5 M Sport",
-      price: "$68,900",
+      price: formatPrice(convertUSDtoINR(68900)),
       image: suvImage,
       year: "2023",
-      mileage: "12,500 mi",
+      mileage: "12,500 km",
       fuel: "Hybrid",
       transmission: "Automatic",
       featured: true,
@@ -19,10 +20,10 @@ const FeaturedCars = () => {
     {
       id: "2",
       title: "Tesla Model S Plaid",
-      price: "$89,990",
+      price: formatPrice(convertUSDtoINR(89990)),
       image: sedanImage,
       year: "2024",
-      mileage: "5,200 mi",
+      mileage: "5,200 km",
       fuel: "Electric",
       transmission: "Automatic",
       featured: true,
@@ -30,10 +31,10 @@ const FeaturedCars = () => {
     {
       id: "3",
       title: "Porsche 911 Carrera",
-      price: "$115,000",
+      price: formatPrice(convertUSDtoINR(115000)),
       image: sportsImage,
       year: "2023",
-      mileage: "8,900 mi",
+      mileage: "8,900 km",
       fuel: "Petrol",
       transmission: "Manual",
       featured: true,
