@@ -1,11 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Car, Menu, User, Heart, LogOut } from "lucide-react";
+import { Car, Menu, User, Heart, LogOut, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ThemeToggle from "./ThemeToggle";
 import { toast } from "sonner";
-
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,9 +16,11 @@ const Navbar = () => {
       setUser(session?.user ?? null);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
 
     return () => subscription.unsubscribe();
   }, []);
@@ -29,141 +30,187 @@ const Navbar = () => {
     toast.success("Signed out successfully");
     navigate("/");
   };
-  return 
-  <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-  <div className="container mx-auto px-4">
-    <div className="flex h-16 items-center justify-between">
-      <Link to="/" className="flex items-center space-x-2">
-        <Car className="h-8 w-8 text-primary" />
-        <span className="text-xl font-bold font-display">Car-Connect</span>
-      </Link>
 
-      {/* Desktop Navigation */}
-      <div className="hidden md:flex items-center space-x-8">
-        <Link to="/" className="text-sm font-medium hover:text-primary">
-          Home
-        </Link>
-        <Link to="/cars" className="text-sm font-medium hover:text-primary">
-          Cars
-        </Link>
-        <Link to="/categories" className="text-sm font-medium hover:text-primary">
-          Categories
-        </Link>
-        <a href="/#services" className="text-sm font-medium hover:text-primary">
-          Services
-        </a>
-        <Link to="/contact" className="text-sm font-medium hover:text-primary">
-          Contact
-        </Link>
-      </div>
+  return (
+    <nav className="sticky top-0 z-50 w-full bg-[rgba(255,255,255,0.3)] dark:bg-[rgba(15,15,15,0.4)] backdrop-blur-xl border-b border-white/20 shadow-lg">
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
 
-      {/* Desktop Right Menu */}
-      <div className="hidden md:flex items-center space-x-4">
-        <ThemeToggle />
+          {/* LOGO */}
+          <Link to="/" className="flex items-center space-x-2 group">
+            <Car className="h-8 w-8 text-primary group-hover:scale-110 transition-transform duration-200" />
+            <span className="text-xl font-bold tracking-tight font-display">
+              Car-Connect
+            </span>
+          </Link>
 
-        {user ? (
-          <>
-            {/* Profile */}
-            <Link to="/profile">
-              <Button variant="ghost" size="sm">
-                <User className="h-4 w-4 mr-2" />
-                My Profile
-              </Button>
-            </Link>
-
-            {/* Logout */}
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-
-            {/* Sell Car */}
-            <Link to="/sell">
-              <Button size="sm" className="btn-primary">
-                Sell Car
-              </Button>
-            </Link>
-          </>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate("/auth")}
-          >
-            <User className="h-4 w-4 mr-2" />
-            Login
-          </Button>
-        )}
-      </div>
-
-      {/* Mobile Menu Button */}
-      <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
-        <Menu className="h-6 w-6" />
-      </button>
-    </div>
-
-    {/* Mobile Navigation */}
-    {isOpen && (
-      <div className="md:hidden py-4 space-y-4 animate-fade-in">
-        <Link to="/" className="block text-sm font-medium hover:text-primary">
-          Home
-        </Link>
-        <Link to="/cars" className="block text-sm font-medium hover:text-primary">
-          Cars
-        </Link>
-        <Link to="/categories" className="block text-sm font-medium hover:text-primary">
-          Categories
-        </Link>
-        <a href="/#services" className="block text-sm font-medium hover:text-primary">
-          Services
-        </a>
-        <Link to="/contact" className="block text-sm font-medium hover:text-primary">
-          Contact
-        </Link>
-
-        <div className="flex flex-col space-y-2 pt-4 border-t">
-          <div className="flex justify-center pb-2">
-            <ThemeToggle />
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8 ml-10">
+            {["Home", "Cars", "Categories", "Services", "Contact"].map(
+              (item) => (
+                <Link
+                  key={item}
+                  to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
+                  className="text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide"
+                >
+                  {item}
+                </Link>
+              )
+            )}
           </div>
 
-          {user ? (
-            <>
-              {/* My Profile - Mobile */}
-              <Link to="/profile">
-                <Button variant="ghost" size="sm">
-                  <User className="h-4 w-4 mr-2" />
-                  My Profile
-                </Button>
-              </Link>
+          {/* Desktop Right Menu */}
+          <div className="hidden md:flex items-center space-x-4">
 
-              {/* Logout */}
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
+            <ThemeToggle />
 
-              {/* Sell Car */}
-              <Link to="/sell">
-                <Button size="sm" className="btn-primary w-full">
-                  Sell Car
-                </Button>
-              </Link>
-            </>
-          ) : (
+            {/* Favorites */}
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/auth")}
+              variant="ghost"
+              size="icon"
+              className="hover:bg-primary/10 rounded-full transition"
             >
-              <User className="h-4 w-4 mr-2" />
-              Login
+              <Heart className="h-5 w-5" />
             </Button>
-          )}
-        </div>
-      </div>
-    )}
-  </div>
-</nav>
 
+            {user ? (
+              <>
+                {/* Profile */}
+                <Link to="/profile">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="rounded-full hover:bg-primary/10 transition"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Button>
+                </Link>
+
+                {/* Logout */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="rounded-full hover:bg-red-600 hover:text-white transition"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+
+                {/* Sell Car */}
+                <Link to="/sell">
+                  <Button
+                    size="sm"
+                    className="btn-primary rounded-full px-5 py-2 shadow-md hover:shadow-xl transition-transform hover:scale-105"
+                  >
+                    Sell Car
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/auth")}
+                className="rounded-full"
+              >
+                <User className="h-4 w-4 mr-2" />
+                Login
+              </Button>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <Menu className="h-7 w-7 text-primary" />
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isOpen && (
+          <div className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-fade-in">
+            <div className="absolute right-0 top-0 w-72 bg-background h-full shadow-xl p-6 animate-slide-left">
+
+              {/* Close Button */}
+              <button
+                className="absolute top-4 right-4"
+                onClick={() => setIsOpen(false)}
+              >
+                <X className="h-6 w-6" />
+              </button>
+
+              <div className="space-y-6 mt-10">
+
+                {/* Links */}
+                {["Home", "Cars", "Categories", "Services", "Contact"].map(
+                  (item) => (
+                    <Link
+                      key={item}
+                      onClick={() => setIsOpen(false)}
+                      to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
+                      className="block text-lg font-medium hover:text-primary transition"
+                    >
+                      {item}
+                    </Link>
+                  )
+                )}
+
+                <hr className="border-white/20" />
+
+                {/* Actions */}
+                <ThemeToggle />
+
+                {user ? (
+                  <div className="space-y-3 mt-6">
+
+                    <Link to="/profile" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" size="sm" className="rounded-full w-full">
+                        <User className="h-4 w-4 mr-2" />
+                        My Profile
+                      </Button>
+                    </Link>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSignOut}
+                      className="rounded-full w-full hover:bg-red-600 hover:text-white"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+
+                    <Link to="/sell" onClick={() => setIsOpen(false)}>
+                      <Button
+                        size="sm"
+                        className="btn-primary rounded-full w-full shadow-md hover:shadow-xl"
+                      >
+                        Sell Car
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate("/auth")}
+                    className="rounded-full w-full mt-4"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Login
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
 };
+
 export default Navbar;
