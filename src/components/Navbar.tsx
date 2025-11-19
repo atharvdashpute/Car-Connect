@@ -54,12 +54,11 @@ const Navbar = () => {
         </div>
 
 
-        
-
+        <div className="hidden md:flex items-center space-x-4">
+          <ThemeToggle />
 
           {/* Favorites */}
           <Button variant="ghost" size="icon">
-            
           </Button>
 
           {user ? (
