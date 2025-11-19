@@ -8,6 +8,7 @@ import Cars from "./pages/Cars";
 import CarDetail from "./pages/CarDetail";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Categories from "./pages/Categories";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/cars" element={<Cars />} />
           <Route path="/car/:id" element={<CarDetail />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/categories" element={<Categories />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
