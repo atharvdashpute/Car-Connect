@@ -47,9 +47,7 @@ const Navbar = () => {
             <a href="/#services" className="text-sm font-medium transition-colors hover:text-primary">
               Services
             </a>
-            <Link to="/categories" className="text-sm font-medium transition-colors hover:text-primary">
-              Categories
-            </Link>
+            
             <Link to="/contact" className="text-sm font-medium transition-colors hover:text-primary">
               Contact
             </Link>
