@@ -39,6 +39,13 @@ const Hero = () => {
                   <SelectItem value="audi">Audi</SelectItem>
                   <SelectItem value="tesla">Tesla</SelectItem>
                   <SelectItem value="porsche">Porsche</SelectItem>
+                  <SelectItem value="toyota">Toyota</SelectItem>
+                  <SelectItem value="honda">Honda</SelectItem>
+                  <SelectItem value="hyundai">Hyundai</SelectItem>
+                  <SelectItem value="maruti">Maruti Suzuki</SelectItem>
+                  <SelectItem value="mahindra">Mahindra</SelectItem>
+                  <SelectItem value="tata">Tata</SelectItem>
+                  <SelectItem value="kia">Kia</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -47,10 +54,10 @@ const Hero = () => {
                   <SelectValue placeholder="Budget" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="20k">Under $20,000</SelectItem>
-                  <SelectItem value="50k">$20,000 - $50,000</SelectItem>
-                  <SelectItem value="100k">$50,000 - $100,000</SelectItem>
-                  <SelectItem value="100k+">$100,000+</SelectItem>
+                  <SelectItem value="20k">Under ₹20 Lakhs</SelectItem>
+                  <SelectItem value="50k">₹20-50 Lakhs</SelectItem>
+                  <SelectItem value="100k">₹50 Lakhs - ₹1 Crore</SelectItem>
+                  <SelectItem value="100k+">Above ₹1 Crore</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -63,6 +70,7 @@ const Hero = () => {
                   <SelectItem value="hybrid">Hybrid</SelectItem>
                   <SelectItem value="petrol">Petrol</SelectItem>
                   <SelectItem value="diesel">Diesel</SelectItem>
+                  <SelectItem value="cng">CNG</SelectItem>
                 </SelectContent>
               </Select>
             </div>

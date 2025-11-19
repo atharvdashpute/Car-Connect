@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Fuel, Gauge, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useFavorites } from "@/hooks/useFavorites";
+import { cn } from "@/lib/utils";
 
 interface CarCardProps {
   id: string;
@@ -17,6 +19,9 @@ interface CarCardProps {
 }
 
 const CarCard = ({ id, title, price, image, year, mileage, fuel, transmission, featured }: CarCardProps) => {
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorite = isFavorite(id);
+
   return (
     <Card className="group hover-lift overflow-hidden border-border/50">
       <div className="relative overflow-hidden">
@@ -30,8 +35,11 @@ const CarCard = ({ id, title, price, image, year, mileage, fuel, transmission, f
             Featured
           </Badge>
         )}
-        <button className="absolute top-3 right-3 p-2 rounded-full bg-background/90 hover:bg-background transition-colors">
-          <Heart className="h-4 w-4" />
+        <button 
+          onClick={() => toggleFavorite(id)}
+          className="absolute top-3 right-3 p-2 rounded-full bg-background/90 hover:bg-background transition-colors"
+        >
+          <Heart className={cn("h-4 w-4", favorite && "fill-primary text-primary")} />
         </button>
       </div>
       
