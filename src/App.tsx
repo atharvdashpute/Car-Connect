@@ -13,6 +13,8 @@ import Profile from "./pages/Profile";
 import SellCarForm from "./pages/SellCarForm";
 import ChatRoom from "./pages/ChatRoom";
 import ViewDetails from "./pages/ViewDetails";
+import Categories from "./pages/Categories";
+import Contact from "./pages/Contact";
 
 
 
@@ -28,6 +30,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/cars" element={<Cars />} />
           <Route path="/car/:id" element={<CarDetail />} />
+          <Route path="/view/:id" element={<ViewDetails />} />
+          <Route path="/categories" element={<Categories />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/sell" element={<SellCarForm />} />

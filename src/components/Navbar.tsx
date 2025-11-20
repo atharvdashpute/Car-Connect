@@ -1,14 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Car, Menu, User, Heart, LogOut, X } from "lucide-react";
+import { Car, Menu, User, Heart, LogOut, X, Phone } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ThemeToggle from "./ThemeToggle";
 import { toast } from "sonner";
+import CallBackDialog from "./CallBackDialog";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [callDialogOpen, setCallDialogOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,17 +63,18 @@ const Navbar = () => {
 
           {/* Desktop Right Menu */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Call Us Button */}
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setCallDialogOpen(true)}
+              className="rounded-full gap-2"
+            >
+              <Phone className="h-4 w-4" />
+              Call us
+            </Button>
 
             <ThemeToggle />
-
-            {/* Favorites */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hover:bg-primary/10 rounded-full transition"
-            >
-              <Heart className="h-5 w-5" />
-            </Button>
 
             {user ? (
               <>
@@ -209,6 +212,8 @@ const Navbar = () => {
           </div>
         )}
       </div>
+      
+      <CallBackDialog open={callDialogOpen} onOpenChange={setCallDialogOpen} />
     </nav>
   );
 };
