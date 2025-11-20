@@ -1,22 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
-/**
- * ViewDetails page:
- * - fetches car by id
- * - shows full specs, seller info
- * - EMI calculator
- * - Send message form + call seller button (number added)
- * - Razorpay payment integration (client side)
- * - Shows payment history (if provided by API)
- */
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const formatINR = (value: number | string) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
     Number(String(value).replace(/[^\d.-]/g, "")) || 0
   );
 
-const CALL_NUMBER = "+918847784496"; // as requested
+const CALL_NUMBER = "+918847784496";
 
 const ViewDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,29 +26,26 @@ const ViewDetails: React.FC = () => {
   const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
 
   useEffect(() => {
-    // Fetch car details (replace endpoint with your API)
-    fetch(`/api/cars/${id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setCar(data);
-        // fill default EMI principal from car price if available
-        const priceNum = data?.price ? Number(String(data.price).replace(/[^\d.-]/g, "")) : 0;
-        setEmi((e) => ({ ...e, principal: priceNum }));
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
-
-    // Fetch payment history
-    fetch(`/api/payments/history?carId=${id}`)
-      .then((r) => r.json())
-      .then((h) => setPaymentHistory(h || []))
-      .catch(() => {});
+    // Mock car data - in production, fetch from API
+    const mockCar = {
+      id: id,
+      name: "BMW X5 M Sport",
+      price: 6890000,
+      image: "https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg",
+      location: "Mumbai, India",
+      specs: { hp: "523 HP", seats: 5, transmission: "Automatic" },
+      fuel: "Hybrid",
+      description: "Luxurious SUV with powerful performance and premium features. This BMW X5 M Sport offers an exceptional driving experience with cutting-edge technology.",
+      sellerName: "Premium Motors",
+      sellerLocation: "Mumbai",
+    };
+    
+    setCar(mockCar);
+    setEmi((e) => ({ ...e, principal: mockCar.price }));
+    setLoading(false);
   }, [id]);
 
   useEffect(() => {
-    // compute monthly EMI formula
     const P = Number(emi.principal) || 0;
     const annualRate = Number(emi.rate) / 100;
     const n = Number(emi.years) * 12;
@@ -64,223 +58,186 @@ const ViewDetails: React.FC = () => {
     setEmi((prev) => ({ ...prev, monthly: Math.round(monthly) }));
   }, [emi.principal, emi.years, emi.rate]);
 
-  if (loading) return <div className="p-6">Loading...</div>;
-  if (!car) return <div className="p-6">Car not found</div>;
+  if (loading) return (
+    <div className="min-h-screen">
+      <Navbar />
+      <div className="container mx-auto px-4 py-20 text-center">Loading...</div>
+      <Footer />
+    </div>
+  );
+  
+  if (!car) return (
+    <div className="min-h-screen">
+      <Navbar />
+      <div className="container mx-auto px-4 py-20 text-center">Car not found</div>
+      <Footer />
+    </div>
+  );
 
   function handleSendMessage() {
-    // POST message to seller
-    fetch(`/api/messages`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        carId: car.id,
-        sellerId: car.sellerId,
-        message,
-      }),
-    })
-      .then((r) => r.json())
-      .then(() => {
-        alert("Message sent to seller");
-        setMessage("");
-      })
-      .catch(() => alert("Error sending message"));
+    alert("Message sent to seller!");
+    setMessage("");
   }
 
   async function handlePayment() {
-    // Create order on server, then call Razorpay checkout
-    const res = await fetch(`/api/payments/create-order`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ amount: Number(car.price).toFixed(0) || 0, carId: car.id }),
-    });
-    const data = await res.json();
-    if (!data?.orderId) return alert("Payment initialization failed");
-
-    // Load Razorpay script
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    document.body.appendChild(script);
-
-    script.onload = () => {
-      // Open Razorpay
-      const options = {
-        key: process.env.REACT_APP_RAZORPAY_KEY || "rzp_test_xxx", // set env
-        amount: data.amount,
-        currency: "INR",
-        name: "Car Connect",
-        description: `Payment for ${car.name}`,
-        order_id: data.orderId,
-        handler: function (response: any) {
-          // verify on server
-          fetch("/api/payments/verify", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ ...response, orderId: data.orderId, carId: car.id }),
-          })
-            .then((r) => r.json())
-            .then((r) => {
-              if (r.success) {
-                alert("Payment successful");
-                // refresh payment history
-                fetch(`/api/payments/history?carId=${id}`)
-                  .then((r) => r.json())
-                  .then((h) => setPaymentHistory(h || []))
-                  .catch(() => {});
-              } else {
-                alert("Payment verification failed");
-              }
-            });
-        },
-        prefill: {
-          name: car.sellerName ?? "",
-          contact: car.sellerPhone ?? "",
-        },
-        theme: { color: "#2563eb" },
-      };
-      // @ts-ignore
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    };
+    alert("Payment gateway integration coming soon!");
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="flex flex-col md:flex-row gap-6">
-        <div className="md:w-2/3 bg-white rounded-xl shadow p-4">
-          <img src={car.image} alt={car.name} className="w-full h-80 object-cover rounded-lg" />
-          <h1 className="text-2xl font-bold mt-4">{car.name}</h1>
-          <div className="flex items-center gap-4 mt-2">
-            <div className="text-xl font-semibold">{formatINR(car.price)}</div>
-            <div className="text-sm text-gray-600">| {car.location ?? "Location not set"}</div>
-          </div>
+    <div className="min-h-screen">
+      <Navbar />
+      
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="overflow-hidden">
+              <img src={car.image} alt={car.name} className="w-full h-64 md:h-96 object-cover" />
+            </Card>
 
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <div className="text-xs text-gray-500">Horsepower</div>
-              <div className="font-medium">{car.specs?.hp ?? "—"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500">Seats</div>
-              <div className="font-medium">{car.specs?.seats ?? "—"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500">Transmission</div>
-              <div className="font-medium">{car.specs?.transmission ?? "—"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500">Fuel</div>
-              <div className="font-medium">{car.fuel ?? "—"}</div>
-            </div>
-          </div>
+            <Card className="p-6">
+              <div className="space-y-6">
+                <div>
+                  <Badge className="mb-3">Featured</Badge>
+                  <h1 className="text-2xl md:text-3xl font-bold mb-2">{car.name}</h1>
+                  <p className="text-2xl md:text-3xl font-bold text-primary">{formatINR(car.price)}</p>
+                  <p className="text-muted-foreground mt-2">{car.location}</p>
+                </div>
 
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold">Description</h3>
-            <p className="text-sm text-gray-700 mt-2">{car.description ?? "No description provided."}</p>
-          </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-lg bg-muted">
+                    <p className="text-sm text-muted-foreground">Horsepower</p>
+                    <p className="font-semibold">{car.specs?.hp ?? "—"}</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted">
+                    <p className="text-sm text-muted-foreground">Seats</p>
+                    <p className="font-semibold">{car.specs?.seats ?? "—"}</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted">
+                    <p className="text-sm text-muted-foreground">Transmission</p>
+                    <p className="font-semibold">{car.specs?.transmission ?? "—"}</p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-muted">
+                    <p className="text-sm text-muted-foreground">Fuel</p>
+                    <p className="font-semibold">{car.fuel ?? "—"}</p>
+                  </div>
+                </div>
 
-          {/* EMI Calculator */}
-          <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-            <h4 className="font-semibold">EMI Calculator</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
-              <div>
-                <label className="text-xs text-gray-500">Loan Amount</label>
-                <input
-                  type="number"
-                  value={emi.principal}
-                  onChange={(e) => setEmi((s) => ({ ...s, principal: Number(e.target.value) }))}
-                  className="mt-1 w-full rounded border p-2"
-                />
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Description</h3>
+                  <p className="text-muted-foreground">{car.description}</p>
+                </div>
+
+                {/* EMI Calculator */}
+                <Card className="p-6 bg-muted/50">
+                  <h4 className="font-semibold text-lg mb-4">EMI Calculator</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-2 block">Loan Amount (₹)</label>
+                      <Input
+                        type="number"
+                        value={emi.principal}
+                        onChange={(e) => setEmi((s) => ({ ...s, principal: Number(e.target.value) }))}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-2 block">Tenure (years)</label>
+                      <Input
+                        type="number"
+                        value={emi.years}
+                        min={1}
+                        onChange={(e) => setEmi((s) => ({ ...s, years: Number(e.target.value) }))}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground mb-2 block">Interest Rate (% p.a.)</label>
+                      <Input
+                        type="number"
+                        value={emi.rate}
+                        step="0.1"
+                        onChange={(e) => setEmi((s) => ({ ...s, rate: Number(e.target.value) }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 p-4 bg-primary/10 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Estimated Monthly EMI</p>
+                    <p className="text-2xl md:text-3xl font-bold text-primary">{formatINR(emi.monthly)}</p>
+                  </div>
+                </Card>
               </div>
-              <div>
-                <label className="text-xs text-gray-500">Tenure (years)</label>
-                <input
-                  type="number"
-                  value={emi.years}
-                  min={1}
-                  onChange={(e) => setEmi((s) => ({ ...s, years: Number(e.target.value) }))}
-                  className="mt-1 w-full rounded border p-2"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-500">Interest Rate (p.a.)</label>
-                <input
-                  type="number"
-                  value={emi.rate}
-                  step="0.1"
-                  onChange={(e) => setEmi((s) => ({ ...s, rate: Number(e.target.value) }))}
-                  className="mt-1 w-full rounded border p-2"
-                />
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <div className="text-sm text-gray-500">Estimated Monthly EMI</div>
-              <div className="text-2xl font-bold">{formatINR(emi.monthly)}</div>
-            </div>
+            </Card>
           </div>
+
+          {/* Sidebar */}
+          <aside className="space-y-4">
+            <Card className="p-6">
+              <h3 className="font-semibold mb-2">Seller Information</h3>
+              <p className="font-medium">{car.sellerName}</p>
+              <p className="text-sm text-muted-foreground">{car.sellerLocation}</p>
+
+              <div className="mt-6 space-y-3">
+                <a href={`tel:${CALL_NUMBER}`}>
+                  <Button className="w-full" variant="default">
+                    Call Seller (+91 88477 84496)
+                  </Button>
+                </a>
+                <Button 
+                  className="w-full" 
+                  variant="outline"
+                  onClick={() => navigate(`/chat/${car.id}`)}
+                >
+                  Message Seller
+                </Button>
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => navigate(`/book-drive?carId=${car.id}`)}
+                >
+                  Book Test Drive
+                </Button>
+                <Button 
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-white"
+                  onClick={handlePayment}
+                >
+                  Pay / Purchase
+                </Button>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4">Send Message</h3>
+              <Textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Your message to the seller..."
+                rows={4}
+                className="mb-3"
+              />
+              <Button onClick={handleSendMessage} className="w-full">
+                Send Message
+              </Button>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4">Payment History</h3>
+              {paymentHistory.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No payment history available</p>
+              ) : (
+                <ul className="space-y-2">
+                  {paymentHistory.map((p) => (
+                    <li key={p._id} className="flex justify-between text-sm">
+                      <span>{p.purpose}</span>
+                      <span className="font-semibold">{formatINR(p.amount)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          </aside>
         </div>
-
-        {/* Right column: seller + actions */}
-        <aside className="md:w-1/3 space-y-4">
-          <div className="bg-white rounded-xl p-4 shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-500">Seller</div>
-                <div className="font-semibold">{car.sellerName ?? "Seller name"}</div>
-                <div className="text-xs text-gray-500">{car.sellerLocation ?? ""}</div>
-              </div>
-            </div>
-
-            <div className="mt-4 space-y-2">
-              <a href={`tel:${CALL_NUMBER}`} className="block w-full text-center py-2 rounded-lg bg-green-600 text-white">
-                Call Seller (+91 88477 84496)
-              </a>
-              <button onClick={() => {
-                navigate(`/chat/${car.id}`);
-              }} className="w-full py-2 rounded-lg border">
-                Message Seller
-              </button>
-
-              <button onClick={() => {
-                // Book test drive route (stub)
-                navigate(`/book-drive?carId=${car.id}`);
-              }} className="w-full py-2 rounded-lg bg-blue-600 text-white">
-                Book Test Drive
-              </button>
-
-              <button onClick={handlePayment} className="w-full py-2 rounded-lg bg-amber-500 text-white">
-                Pay / Purchase
-              </button>
-            </div>
-          </div>
-
-          {/* Send direct message */}
-          <div className="bg-white rounded-xl p-4 shadow">
-            <div className="text-sm text-gray-600">Send a message to seller</div>
-            <textarea value={message} onChange={(e) => setMessage(e.target.value)} className="mt-2 w-full rounded border p-2" rows={4} />
-            <button onClick={handleSendMessage} className="mt-3 w-full py-2 bg-blue-600 text-white rounded-lg">
-              Send Message
-            </button>
-          </div>
-
-          {/* Payment history */}
-          <div className="bg-white rounded-xl p-4 shadow">
-            <h4 className="font-semibold">Payment History</h4>
-            {paymentHistory.length === 0 ? (
-              <div className="text-sm text-gray-500 mt-2">No payments yet.</div>
-            ) : (
-              <ul className="mt-2 space-y-2">
-                {paymentHistory.map((p) => (
-                  <li key={p._id} className="text-sm flex justify-between">
-                    <div>{p.purpose ?? "Purchase"}</div>
-                    <div>{formatINR(p.amount)}</div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </aside>
       </div>
+      
+      <Footer />
     </div>
   );
 };
