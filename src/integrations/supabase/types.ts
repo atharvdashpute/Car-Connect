@@ -24,6 +24,9 @@ export type Database = {
           created_at: string
           id: string
           payment_status: string | null
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          razorpay_signature: string | null
           status: string
           stripe_payment_id: string | null
           updated_at: string
@@ -37,6 +40,9 @@ export type Database = {
           created_at?: string
           id?: string
           payment_status?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_signature?: string | null
           status?: string
           stripe_payment_id?: string | null
           updated_at?: string
@@ -50,6 +56,9 @@ export type Database = {
           created_at?: string
           id?: string
           payment_status?: string | null
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          razorpay_signature?: string | null
           status?: string
           stripe_payment_id?: string | null
           updated_at?: string
