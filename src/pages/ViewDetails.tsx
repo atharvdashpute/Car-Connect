@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const formatINR = (value: number | string) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
@@ -26,24 +28,58 @@ const ViewDetails: React.FC = () => {
   const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
 
   useEffect(() => {
-    // Mock car data - in production, fetch from API
-    const mockCar = {
-      id: id,
-      name: "BMW X5 M Sport",
-      price: 6890000,
-      image: "https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg",
-      location: "Mumbai, India",
-      specs: { hp: "523 HP", seats: 5, transmission: "Automatic" },
-      fuel: "Hybrid",
-      description: "Luxurious SUV with powerful performance and premium features. This BMW X5 M Sport offers an exceptional driving experience with cutting-edge technology.",
-      sellerName: "Premium Motors",
-      sellerLocation: "Mumbai",
-    };
-    
-    setCar(mockCar);
-    setEmi((e) => ({ ...e, principal: mockCar.price }));
-    setLoading(false);
+    loadCarData();
   }, [id]);
+
+  const loadCarData = async () => {
+    if (!id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from("cars")
+        .select(`
+          *,
+          profiles!cars_seller_id_fkey (
+            full_name,
+            phone,
+            location
+          )
+        `)
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setCar({
+          id: data.id,
+          name: data.title,
+          price: data.price,
+          image: "https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg",
+          location: data.location || "India",
+          specs: { 
+            hp: data.power || "—", 
+            seats: data.seats || 5, 
+            transmission: data.transmission 
+          },
+          fuel: data.fuel_type,
+          description: data.description,
+          sellerName: (data.profiles as any)?.full_name || "Seller",
+          sellerLocation: (data.profiles as any)?.location || data.location,
+          brand: data.brand,
+          model: data.model,
+          year: data.year,
+          mileage: data.mileage,
+        });
+        setEmi((e) => ({ ...e, principal: data.price }));
+      }
+    } catch (error) {
+      console.error("Error loading car:", error);
+      toast.error("Failed to load car details");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const P = Number(emi.principal) || 0;
@@ -74,13 +110,41 @@ const ViewDetails: React.FC = () => {
     </div>
   );
 
-  function handleSendMessage() {
-    alert("Message sent to seller!");
-    setMessage("");
+  async function handleSendMessage() {
+    if (!message.trim()) {
+      toast.error("Please enter a message");
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        toast.error("Please sign in to send messages");
+        navigate("/auth");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("inquiries")
+        .insert({
+          buyer_id: session.user.id,
+          car_id: id!,
+          message: message,
+          status: "pending"
+        });
+
+      if (error) throw error;
+
+      toast.success("Message sent to seller!");
+      setMessage("");
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to send message");
+    }
   }
 
   async function handlePayment() {
-    alert("Payment gateway integration coming soon!");
+    toast.info("Payment gateway integration coming soon! This will support multiple payment methods including UPI, cards, and net banking.");
   }
 
   return (
@@ -211,7 +275,7 @@ const ViewDetails: React.FC = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Your message to the seller..."
                 rows={4}
-                className="mb-3"
+                className="mb-3 text-foreground"
               />
               <Button onClick={handleSendMessage} className="w-full">
                 Send Message
