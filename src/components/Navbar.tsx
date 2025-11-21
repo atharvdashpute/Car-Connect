@@ -48,17 +48,41 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8 ml-10">
-            {["Home", "Cars", "Categories", "Services", "Contact"].map(
-              (item) => (
-                <Link
-                  key={item}
-                  to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
-                  className="text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide"
-                >
-                  {item}
-                </Link>
-              )
-            )}
+            <Link
+              to="/"
+              className="text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide"
+            >
+              Home
+            </Link>
+            <Link
+              to="/cars"
+              className="text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide"
+            >
+              Cars
+            </Link>
+            <a
+              href="/#services"
+              onClick={(e) => {
+                e.preventDefault();
+                if (window.location.pathname === "/") {
+                  document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
+                } else {
+                  navigate("/#services");
+                  setTimeout(() => {
+                    document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
+                  }, 100);
+                }
+              }}
+              className="text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide cursor-pointer"
+            >
+              Services
+            </a>
+            <Link
+              to="/contact"
+              className="text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide"
+            >
+              Contact
+            </Link>
           </div>
 
           {/* Desktop Right Menu */}
@@ -149,18 +173,44 @@ const Navbar = () => {
               <div className="space-y-6 mt-10">
 
                 {/* Links */}
-                {["Home", "Cars", "Categories", "Services", "Contact"].map(
-                  (item) => (
-                    <Link
-                      key={item}
-                      onClick={() => setIsOpen(false)}
-                      to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
-                      className="block text-lg font-medium hover:text-primary transition"
-                    >
-                      {item}
-                    </Link>
-                  )
-                )}
+                <Link
+                  onClick={() => setIsOpen(false)}
+                  to="/"
+                  className="block text-lg font-medium hover:text-primary transition"
+                >
+                  Home
+                </Link>
+                <Link
+                  onClick={() => setIsOpen(false)}
+                  to="/cars"
+                  className="block text-lg font-medium hover:text-primary transition"
+                >
+                  Cars
+                </Link>
+                <a
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsOpen(false);
+                    if (window.location.pathname === "/") {
+                      document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
+                    } else {
+                      navigate("/#services");
+                      setTimeout(() => {
+                        document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
+                      }, 100);
+                    }
+                  }}
+                  className="block text-lg font-medium hover:text-primary transition cursor-pointer"
+                >
+                  Services
+                </a>
+                <Link
+                  onClick={() => setIsOpen(false)}
+                  to="/contact"
+                  className="block text-lg font-medium hover:text-primary transition"
+                >
+                  Contact
+                </Link>
 
                 <hr className="border-white/20" />
 
