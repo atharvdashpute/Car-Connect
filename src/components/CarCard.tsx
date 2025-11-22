@@ -5,6 +5,7 @@ import { Heart, Fuel, Gauge, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useFavorites } from "@/hooks/useFavorites";
 import { cn } from "@/lib/utils";
+import { cars } from "@/data/cars";
 
 interface CarCardProps {
   id: string;
