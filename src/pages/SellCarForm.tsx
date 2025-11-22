@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Upload, X } from "lucide-react";
 
 const SellCarForm: React.FC = () => {
   const navigate = useNavigate();
@@ -28,6 +29,31 @@ const SellCarForm: React.FC = () => {
     location: "",
   });
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length + images.length > 5) {
+      toast.error("Maximum 5 images allowed");
+      return;
+    }
+
+    setImages([...images, ...files]);
+    
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviews(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,6 +65,12 @@ const SellCarForm: React.FC = () => {
       if (!session?.user) {
         toast.error("Please sign in to list a car");
         navigate("/auth");
+        return;
+      }
+
+      if (images.length === 0) {
+        toast.error("Please upload at least one car image");
+        setLoading(false);
         return;
       }
 
@@ -58,14 +90,43 @@ const SellCarForm: React.FC = () => {
           mileage: form.mileage ? Number(form.mileage) : null,
           location: form.location,
           seller_id: session.user.id,
-          status: "pending"
+          status: "approved"
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      toast.success("Car listed successfully! Pending approval.");
+      // Upload images
+      for (let i = 0; i < images.length; i++) {
+        const file = images[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${session.user.id}/${data.id}/${Date.now()}_${i}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('car-images')
+          .upload(fileName, file);
+
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          continue;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('car-images')
+          .getPublicUrl(fileName);
+
+        await supabase
+          .from('car_images')
+          .insert({
+            car_id: data.id,
+            image_url: publicUrl,
+            is_primary: i === 0,
+            display_order: i
+          });
+      }
+
+      toast.success("Car listed successfully!");
       navigate(`/view/${data.id}`);
     } catch (err) {
       console.error("Error:", err);
@@ -232,6 +293,47 @@ const SellCarForm: React.FC = () => {
                 onChange={(e)=>setForm({...form, description:e.target.value})}
                 rows={5}
               />
+            </div>
+
+            <div>
+              <Label>Car Images (Max 5) *</Label>
+              <div className="mt-2 space-y-4">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/70 transition-colors">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload className="w-10 h-10 mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Click to upload car images</p>
+                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG up to 10MB</p>
+                  </div>
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                  />
+                </label>
+
+                {imagePreviews.length > 0 && (
+                  <div className="grid grid-cols-3 gap-4">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative group">
+                        <img 
+                          src={preview} 
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-1 right-1 bg-destructive text-destructive-foreground p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
