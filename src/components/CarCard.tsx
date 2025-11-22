@@ -69,7 +69,7 @@ const CarCard = ({ id, title, price, image, year, mileage, fuel, transmission, f
           </div>
         </div>
 
-         <Link to={`/view-detail/${car.id}`}>
+        <Link to={`/view-detail/${id}`}>
           <Button className="w-full btn-primary">
             View Details
           </Button>
