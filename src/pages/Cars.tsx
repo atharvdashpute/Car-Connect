@@ -11,7 +11,7 @@ import { useState, useMemo, useEffect } from "react";
 import { formatPrice } from "@/utils/currency";
 import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams } from "react-router-dom";
-import { cars } from "@/data/cars"
+import {cars} from "@/data/cars"
 
 interface Car {
   id: string;
@@ -62,9 +62,9 @@ const Cars = () => {
 
       const carsWithImages = data?.map(car => ({
         ...car,
-        image: car.car_images?.find((img: any) => img.is_primary)?.image_url ||
-          car.car_images?.[0]?.image_url ||
-          "https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg"
+        image: car.car_images?.find((img: any) => img.is_primary)?.image_url || 
+               car.car_images?.[0]?.image_url || 
+               "https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg"
       })) || [];
 
       setCars(carsWithImages);
@@ -77,11 +77,11 @@ const Cars = () => {
 
   const filteredAndSortedCars = useMemo(() => {
     let filtered = cars.filter(car => {
-      const matchesSearch = searchQuery === "" ||
+      const matchesSearch = searchQuery === "" || 
         car.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         car.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
         car.model?.toLowerCase().includes(searchQuery.toLowerCase());
-
+      
       const matchesPrice = car.price >= priceRange[0] && car.price <= priceRange[1];
       const matchesBrand = selectedBrand === "all" || car.brand.toLowerCase() === selectedBrand.toLowerCase();
       const matchesFuel = selectedFuel === "all" || car.fuel_type.toLowerCase() === selectedFuel.toLowerCase();
@@ -90,7 +90,7 @@ const Cars = () => {
 
       return matchesSearch && matchesPrice && matchesBrand && matchesFuel && matchesBody && matchesTransmission;
     });
-
+    
     switch (sortBy) {
       case "price-low":
         filtered.sort((a, b) => a.price - b.price);
@@ -104,7 +104,7 @@ const Cars = () => {
       default:
         filtered.sort((a, b) => b.year - a.year);
     }
-
+    
     return filtered;
   }, [cars, searchQuery, priceRange, selectedBrand, selectedFuel, selectedBodyType, selectedTransmission, sortBy]);
 
@@ -130,7 +130,7 @@ const Cars = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-
+      
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="w-full lg:w-64 space-y-6">
@@ -144,8 +144,8 @@ const Cars = () => {
                 <label className="text-sm font-medium">Search</label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search cars..."
+                  <Input 
+                    placeholder="Search cars..." 
                     className="pl-10"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -293,14 +293,13 @@ const Cars = () => {
                   <CarCard
                     key={car.id}
                     id={car.id}
-                    title={car.name}
-                    price={`₹{car.price}`}
+                    title={car.title}
+                    price={formatPrice(car.price)}
                     image={car.image}
                     year={car.year.toString()}
-                    mileage={`₹{car.mileage} km`}
-                    fuel={car.fuelType}
+                    mileage={car.mileage ? `${car.mileage.toLocaleString()} km` : "N/A"}
+                    fuel={car.fuel_type}
                     transmission={car.transmission}
-                    featured={true}
                   />
                 ))}
               </div>

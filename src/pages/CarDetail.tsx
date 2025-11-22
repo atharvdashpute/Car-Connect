@@ -16,17 +16,13 @@ const CarDetail = () => {
   const similarCars = [
     {
       id: "2",
-      
-                    id={car.id}
-                    key={car.id}
-                    title={car.name}
-                    price={`₹{car.price}`}
-                    image={car.image}
-                    year={car.year.toString()}
-                    mileage={`₹{car.mileage} km`}
-                    fuel={car.fuelType}
-                    transmission={car.transmission}
-                    featured={true}
+      title: "Tesla Model S Plaid",
+      price: "$89,990",
+      image: sedanImage,
+      year: "2024",
+      mileage: "5,200 mi",
+      fuel: "Electric",
+      transmission: "Automatic",
     },
     {
       id: "3",
