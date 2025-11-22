@@ -11,6 +11,7 @@ import { useState, useMemo, useEffect } from "react";
 import { formatPrice } from "@/utils/currency";
 import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams } from "react-router-dom";
+import {cars} from "@/data/cars"
 
 interface Car {
   id: string;

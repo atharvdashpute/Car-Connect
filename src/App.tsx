@@ -14,6 +14,7 @@ import SellCarForm from "./pages/SellCarForm";
 import ChatRoom from "./pages/ChatRoom";
 import ViewDetails from "./pages/ViewDetails";
 import Contact from "./pages/Contact";
+import {cars} from "@/data/cars"
 
 
 
