@@ -1,10 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-car.jpg";
 
 const Hero = () => {
+  const navigate = useNavigate();
+  const [brand, setBrand] = useState("");
+  const [budget, setBudget] = useState("");
+  const [fuelType, setFuelType] = useState("");
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (brand && brand !== "all") params.append("brand", brand);
+    if (fuelType && fuelType !== "all") params.append("fuelType", fuelType);
+    navigate(`/cars?${params.toString()}`);
+  };
+
   return (
     <section className="relative h-[600px] md:h-[700px] overflow-hidden">
       <div 
@@ -29,11 +42,12 @@ const Hero = () => {
           {/* Search Bar */}
           <div className="glass-card p-6 rounded-2xl space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Select>
+              <Select value={brand} onValueChange={setBrand}>
                 <SelectTrigger>
                   <SelectValue placeholder="Brand" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Brands</SelectItem>
                   <SelectItem value="bmw">BMW</SelectItem>
                   <SelectItem value="mercedes">Mercedes-Benz</SelectItem>
                   <SelectItem value="audi">Audi</SelectItem>
@@ -49,7 +63,7 @@ const Hero = () => {
                 </SelectContent>
               </Select>
 
-              <Select>
+              <Select value={budget} onValueChange={setBudget}>
                 <SelectTrigger>
                   <SelectValue placeholder="Budget" />
                 </SelectTrigger>
@@ -61,11 +75,12 @@ const Hero = () => {
                 </SelectContent>
               </Select>
 
-              <Select>
+              <Select value={fuelType} onValueChange={setFuelType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Fuel Type" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Fuel Types</SelectItem>
                   <SelectItem value="electric">Electric</SelectItem>
                   <SelectItem value="hybrid">Hybrid</SelectItem>
                   <SelectItem value="petrol">Petrol</SelectItem>
@@ -75,7 +90,7 @@ const Hero = () => {
               </Select>
             </div>
 
-            <Button className="w-full btn-primary" size="lg">
+            <Button className="w-full btn-primary" size="lg" onClick={handleSearch}>
               <Search className="mr-2 h-5 w-5" />
               Search Cars
             </Button>

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Car, Menu, User, Heart, LogOut, X, Phone } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -9,6 +9,12 @@ import CallBackDialog from "./CallBackDialog";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+
+  const isActive = (path: string) => {
+    if (path === "/") return location.pathname === "/";
+    return location.pathname.startsWith(path);
+  };
   const [user, setUser] = useState<any>(null);
   const [callDialogOpen, setCallDialogOpen] = useState(false);
   const navigate = useNavigate();
@@ -50,13 +56,13 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-8 ml-10">
             <Link
               to="/"
-              className="text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide"
+              className={`text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide ${isActive("/") ? "text-primary border-b-2 border-primary pb-1" : ""}`}
             >
               Home
             </Link>
             <Link
               to="/cars"
-              className="text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide"
+              className={`text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide ${isActive("/cars") ? "text-primary border-b-2 border-primary pb-1" : ""}`}
             >
               Cars
             </Link>
@@ -73,13 +79,13 @@ const Navbar = () => {
                   }, 100);
                 }
               }}
-              className="text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide cursor-pointer"
+              className={`text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide cursor-pointer ${location.hash === "#services" ? "text-primary border-b-2 border-primary pb-1" : ""}`}
             >
               Services
             </a>
             <Link
               to="/contact"
-              className="text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide"
+              className={`text-sm font-medium transition-all duration-200 hover:text-primary hover:tracking-wide ${isActive("/contact") ? "text-primary border-b-2 border-primary pb-1" : ""}`}
             >
               Contact
             </Link>
